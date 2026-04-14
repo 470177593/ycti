@@ -1,1 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YCTI测试</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+
+  .page { display: none; }
+
+  /* ===== 卷首页 ===== */
+  #page-intro {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 80px 28px 80px;
+    text-align: center;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    background: #fff;
+  }
+  #page-intro.active { display: flex; }
+
+  .intro-title {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: #111;
+    line-height: 1.1;
+  }
+
+  .intro-box {
+    border: 2.5px solid #111;
+    border-radius: 18px;
+    padding: 28px 24px;
+    font-size: 18px;
+    line-height: 2;
+    text-align: center;
+    color: #222;
+    width: 100%;
+  }
+
+  .btn-start {
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 18px 64px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 3px;
+    font-family: inherit;
+  }
+  .btn-start:hover { background: #333; }
+
+  /* ===== 答题页 ===== */
+  #page-quiz {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+  }
+  #page-quiz.active { display: flex; }
+
+  .quiz-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .quiz-header-title {
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    color: #111;
+  }
+
+  .progress-bar-wrap {
+    margin-top: 10px;
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #111;
+    border-radius: 2px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .progress-text {
+    text-align: right;
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  .quiz-body {
+    padding: 24px 24px 120px;
+    flex: 1;
+  }
+
+  .question-block {
+    margin-bottom: 40px;
+  }
+
+  .question-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    color: #111;
+  }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #222;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .option-btn:hover { border-color: #555; }
+  .option-btn.selected {
+    background: #2d2d2d;
+    border-color: #2d2d2d;
+    color: #fff;
+  }
+
+  .quiz-footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    padding: 14px 24px 28px;
+    border-top: 1px solid #eee;
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: background 0.2s;
+    font-family: inherit;
+  }
+  .btn-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  .btn-submit:not(:disabled):hover { background: #333; }
+
+  /* ===== 结果页 ===== */
+  #page-result {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    padding: 48px 24px 64px;
+  }
+  #page-result.active { display: flex; }
+
+  .result-label {
+    font-size: 15px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .result-type-name {
+    font-size: 40px;
+    font-weight: 900;
+    text-align: center;
+    color: #111;
+    line-height: 1.2;
+    margin-bottom: 36px;
+    letter-spacing: -0.5px;
+  }
+
+  /* 气泡区 */
+  .bubble-area {
+    position: relative;
+    height: 190px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar-icon {
+    font-size: 64px;
+    position: relative;
+    z-index: 1;
+  }
+  .chat-bubble {
+    position: absolute;
+    background: #2d2d2d;
+    color: #fff;
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 130px;
+    text-align: center;
+    font-weight: 500;
+  }
+  .chat-bubble::after {
+    content: '';
+    position: absolute;
+    border: 6px solid transparent;
+  }
+  .chat-bubble.pos-tl { top: 10px; left: 10px; }
+  .chat-bubble.pos-tr { top: 10px; right: 10px; }
+  .chat-bubble.pos-bl { bottom: 10px; left: 10px; }
+  .chat-bubble.pos-br { bottom: 10px; right: 10px; }
+
+  /* 信息卡片 */
+  .info-card {
+    border: 1.5px solid #e8e8e8;
+    border-radius: 14px;
+    padding: 18px 18px;
+    margin-bottom: 12px;
+  }
+  .info-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: #111;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .info-card-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #444;
+  }
+
+  /* 维度条 */
+  .dims-section {
+    margin-bottom: 12px;
+  }
+  .dim-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .dim-lbl-a { width: 44px; text-align: right; color: #555; font-weight: 600; }
+  .dim-lbl-b { width: 44px; text-align: left; color: #555; font-weight: 600; }
+  .dim-track {
+    flex: 1;
+    height: 6px;
+    background: #eee;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .dim-fill {
+    height: 100%;
+    background: #2d2d2d;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1) 0.2s;
+  }
+
+  /* CP卡片 */
+  .cp-section {
+    border: 1.5px solid #e8e8e8;
+    border-radius: 14px;
+    padding: 18px 18px;
+    margin-bottom: 12px;
+  }
+  .cp-section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cp-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: #111;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .cp-rel-name {
+    font-size: 18px;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 4px;
+  }
+  .cp-partner-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 12px;
+  }
+  .cp-desc-text {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.8;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+  }
+
+  .btn-retry {
+    margin-top: 28px;
+    width: 100%;
+    background: #fff;
+    color: #111;
+    border: 2px solid #111;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-retry:hover { background: #111; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- 卷首页 -->
+<div id="page-intro" class="page active">
+  <div class="intro-title">YCTI测试</div>
+  <div class="intro-box">
+    什么语擦!我不玩语擦啊啊!!<br>
+    （点开测试）（回顾语擦生涯）<br>
+    （偷偷做测试题）
+  </div>
+  <button class="btn-start" onclick="startQuiz()">开始测试</button>
+</div>
+
+<!-- 答题页 -->
+<div id="page-quiz" class="page">
+  <div class="quiz-header">
+    <div class="quiz-header-title">YCTI测试</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">0 / 12</div>
+  </div>
+  <div class="quiz-body" id="quizBody"></div>
+  <div class="quiz-footer">
+    <button class="btn-submit" id="btnSubmit" disabled onclick="submitQuiz()">查看结果</button>
+  </div>
+</div>
+
+<!-- 结果页 -->
+<div id="page-result" class="page">
+  <div class="result-label">你的YCTI倾向为：</div>
+  <div class="result-type-name" id="resultTypeName"></div>
+
+  <div class="bubble-area" id="bubbleArea">
+    <div class="avatar-icon" id="avatarEmoji">🧑</div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-card-title">核心特质</div>
+    <div class="info-card-body" id="resultTrait"></div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-title">经典语录</div>
+    <div class="info-card-body" id="resultQuotes"></div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-title">行为模式</div>
+    <div class="info-card-body" id="resultBehavior"></div>
+  </div>
+
+  <div class="dims-section" id="dimsSection"></div>
+
+  <div class="cp-section">
+    <div class="cp-section-title">CP 舒适区</div>
+    <div class="cp-rel-name" id="cpRelName"></div>
+    <div class="cp-partner-name" id="cpPartnerName"></div>
+    <div class="cp-desc-text" id="cpDesc"></div>
+  </div>
+
+  <button class="btn-retry" onclick="retryQuiz()">再测一次</button>
+</div>
+
+<script>
+// ===== 题目数据 =====
+const QUESTIONS = [
+  { id:'q1',  dim:0, text:'刷到一篇超牛逼的文，你的第一反应是？',
+    options:[{text:'woc牛逼，发给更多人品鉴！',val:'A'},{text:'悄悄点赞，默默欣赏。',val:'B'}] },
+  { id:'q2',  dim:0, text:'遇到心动选手，你的行动是？',
+    options:[{text:'老婆，嗨，你一个人吗？（摘墨镜）（叼着玫瑰闪亮登场）（被玫瑰扎到嘴）',val:'A'},{text:'视奸 / 刷存在感，等待时机',val:'B'}] },
+  { id:'q3',  dim:0, text:'一段忙碌之后，让你回血的最佳方式是？',
+    options:[{text:'约朋友出来玩，或者激情线上聊天',val:'A'},{text:'断掉所有社交，一个人看剧、打游戏或发呆',val:'B'}] },
+  { id:'q4',  dim:1, text:'你更享受哪种"上头"状态？',
+    options:[{text:'量大管饱，25小时在线冲浪，不断获取新信息。',val:'A'},{text:'专精，掘地三尺，钻研到底。',val:'B'}] },
+  { id:'q5',  dim:1, text:'你在写文或产粮的时候的状态更倾向于？',
+    options:[{text:'反复放大镜查看原典，推敲细节设定',val:'A'},{text:'酝酿情绪，必要时打开歌单边听边写',val:'B'}] },
+  { id:'q6',  dim:1, text:'你如何"嗑"CP？',
+    options:[{text:'什么都吃一口只会把日子过得超好。',val:'A'},{text:'家产是最好的。',val:'B'}] },
+  { id:'q7',  dim:2, text:'朋友向你咨询情感问题，你更可能？',
+    options:[{text:'对于这个吃够爱情苦的笨蛋，我旁观者清，会点出问题所在，给他指明一些路子。',val:'A'},{text:'上情绪价值，无论如何，首先不允许他持续感到悲伤。',val:'B'}] },
+  { id:'q8',  dim:2, text:'刷到一条你不认可的观点，你的本能是？',
+    options:[{text:'分析对方的出发点，思考我的看法，评估是否值得我纠正。',val:'A'},{text:'激情开麦，随心行动。',val:'B'}] },
+  { id:'q9',  dim:2, text:'你评价他人语C戏文的首要标准是？',
+    options:[{text:'逻辑是否自洽，表述是否严谨。',val:'A'},{text:'能否触动我的情感，引起的共鸣。',val:'B'}] },
+  { id:'q10', dim:3, text:'在语擦时，你更倾向于？',
+    options:[{text:'发起话题、发布内容。',val:'A'},{text:'欣赏、收藏、赞美他人的创作，是优质的观众。',val:'B'}] },
+  { id:'q11', dim:3, text:'你的语擦表现是？',
+    options:[{text:'联机语擦人，一生都在呼唤对皮，或是和对皮各种语擦。',val:'A'},{text:'单机语擦人，生人勿近。',val:'B'}] },
+  { id:'q12', dim:3, text:'在一个新圈子中，你更倾向于？',
+    options:[{text:'"开拓者"，主动破冰，连接不同的人。',val:'A'},{text:'"观察者"，先熟悉环境，再决定如何融入。',val:'B'}] }
+];
+
+// ===== 人格数据 =====
+const TYPES = {
+  '社-探-逻-主':{ code:'RWKK', name:'好奇者', emoji:'🔍',
+    trait:'擅长主动探索新信息，进行逻辑分析并分享。对一切新粮、旧梗、新坑、冷饭都抱有极致热情。乐于答疑解问，是圈子内的信息枢纽和指路明灯。',
+    quotes:'“何意味？这个结果啥意思呢？”、“不兑！”、“你好，这是什么？我吃一口！”、“我要验牌！”、“何意味？”',
+    behavior:'敏锐察觉到热门话题风向，活跃于各大平台深度探索，收藏夹里全是吃灰的东西。一手资讯的传播者，对一切消息总是心中有数，热衷于向所有人安利新发现。'},
+  '独-沉-逻-主':{ code:'REST', name:'休息者', emoji:'😴',
+    trait:'常主动选择独处，进行深度思考或恢复能量，注重逻辑自省。社交电池容量1%，充电2小时通话5分钟。是地球online的挂机玩家，需要长时间充电回血。',
+    quotes:' “好累……看不清结果，原来是刚睡醒。”、“燃尽了”、“哦……好的”、“好想睡觉”、“好累……”',
+    behavior:'日常状态是离线，看似人还在，但其实已经走了有一会儿了。随时进入节能状态，但也会因为某些关键词而瞬间回血。'},
+  '独-沉-情-主':{ code:'FLAG', name:'立誓者', emoji:'🚩',
+    trait:'情感驱动下制定计划，热衷于宣布目标，然后……没有然后。乐观主义的实力派，一上头就热血立flag定目标，嘴比手快，永远在发誓、永远在搁置。',
+    quotes:'"集赞，一赞十戏！"、"下次一定！"、"明天就写！"（次日："算了，下次一定。"）、"我发誓我再也不立flag了"',
+    behavior:'在热血沸腾地宣布计划和光速打脸之间循环往复，flag 倒满一地。即使计划失败了，也会笑着说 "下次一定"，永远对新的爱好和挑战充满兴趣。'},
+  '社-探-情-被':{ code:'XSWL', name:'欢笑者', emoji:'😂',
+    trait:'哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈！是快乐的化身，对有趣事物的反应强烈到溢出屏幕，笑点清奇又上头，自带魔性感染力。',
+    quotes:'"笑死我了哈哈哈哈！"、"笑不活了…"、"我不行了"',
+    behavior:'是乐趣的第一传播者。他们总能精准 get 到他人的笑点和用心，用最热烈的反馈给予他人最大的肯定。有一颗无比柔软的心，笑容是对这个世界最温暖的保护色。'},
+  '独-沉-逻-被':{ code:'NSDD', name:'躺平者', emoji:'🛋️',
+    trait:'佛系选手，他们有超强的情绪调节能力，能在任何混乱的局面中保持冷静。从容不迫、云淡风轻。并非没有立场与观点，只是清醒地知道争论毫无意义、极度耗能，所以主动选择不参与、不反驳，用最平和的方式避开一切冲突。',
+    quotes:'"（躺平中，坐了起来，看一眼结果）"、"你说得对"、"啊"、"好的呢"、"开心就好"',
+    behavior:'退堂鼓十级选手，高级 “润” 学传承人。默默退出纷争，拒绝辩论从入门到精通，是最省心、最通透的 peace 使者。看起来什么都无所谓，其实心里都有数，只是从不计较。'},
+  '独-探-逻-被':{ code:'OBER', name:'旁观者', emoji:'😑',
+    trait:'清醒又疏离，人群边缘的智者，习惯用逻辑冷眼观察一切，始终与纷争、舆论保持安全距离。永远拥有置身事外的通透与冷静。',
+    quotes:'"嗯。"、"哦。"、"所以？"、"你继续"、"……"',
+    behavior:'安静潜水默默吃瓜，从不随便站队、不轻易入局。偶尔开口便一针见血，一句话就能戳破虚假泡沫，清醒又犀利，是冷静、能够看透一切的存在。'},
+  '社-沉-逻-被':{ code:'NPC', name:'附和者', emoji:'🤖',
+    trait:'习惯性被动，人类本质的践行者。像一面温和的镜子，映照出他人的模样，却对整体走向有重要价值。没有复杂的情绪波动，没有尖锐的个人观点，只有最纯粹的友好和无条件的支持。人生信条：只要我足够随和，就没有任何矛盾能找到我。',
+    quotes:'"+1"、"蹲"、"求踢"、"祝贺"、"对对对"、"兑"、"好的没问题"',
+    behavior:'从不主动发起话题，但任何话题都能无缝接话，精准捧场。一键输出标准回应，不抢戏、不冲突、不纠结，是圈子里最稳定、最靠谱、最不可缺少的氛围组成员。'},
+  '社-沉-情-被':{ code:'YYDS', name:'夸夸者', emoji:'🙌',
+    trait:'天生的赞美艺术家。从不吝啬任何溢美之词，能用最真诚的语言，把每一份喜欢都放大到极致。',
+    quotes:'"您是我永远的神！"、"妈妈，这是神迹！"、"（此处省略800字的夸赞）"、"!!!"',
+    behavior:'文字还没读完，夸夸文案已经自动生成完毕。擅长用最华丽、最有画面感的辞藻，把内心的喜欢与震撼全部表达出来，情绪价值拉满。也会把别人对自己的赞美都记在心里，并且在难过的时候拿出来看。'},
+  '社-探-情-主':{ code:'HYQ+', name:'冲浪者', emoji:'🏄',
+    trait:'社交天花板，圈内人脉王，你天生懂得靠近、懂得接纳、懂得把散落的同好轻轻牵到一起，像一条温柔又坚韧的线，把孤单的人串成温暖的圈。你不是天生热闹，只是太愿意相信，相遇本身就是一件很美好的事。"。',
+    quotes:'"等下就把结果放到pyq"、"卷卷"、"huq+！"、"Hyq+！"、"kl+"',
+    behavior:'好友列表常年爆满。永远在扩张同好版图，搭建更大更热闹的社交圈，没有进不去的圈子，没有认识不到的人。你总是想把更多美好分享给在乎的人。'},
+  '社-沉-情-主':{ code:'CPDD', name:'寻爱者', emoji:'💕',
+    trait:'感性又敏锐的真爱捕捉器，擅长从细节里感受到爱，精准捕捉美好与共鸣；积极寻找同好联结，一生都在追寻完美的灵魂伴侣。',
+    quotes:'"或许从这个结果里能看见爱的具体模样"、"d我"、"求个CP一起产粮！"、"找个搭子"、"好幸福"',
+    behavior:'心底向往的从来不是随便的陪伴，而是灵魂共振、旗鼓相当的同频共鸣。习惯在文字细节里反复穿梭，幻想力遥遥领先；有专属于自己的浪漫世界，等一个有缘人推开心门。'},
+  '社-沉-逻-主':{ code:'SRDS', name:'反驳者', emoji:'🧐',
+    trait:'天生逻辑鬼才，最佳辩手。擅长先赞同再反转，用一句 “但是” 精准补刀、梳理逻辑，主打理性探讨、细节较真。',
+    quotes:'"虽然但是，我觉得……"、"你说的有道理，但是……"',
+    behavior:'用质疑的目光审视世界，用逻辑的利刃剖开表象。沉迷理性讨论，看似在反驳，其实是在追求更完整、更自洽的答案（有时也单纯是想杠一下）。'},
+  '独-探-情-主':{ code:'OOTD', name:'展示者', emoji:'✨',
+    trait:'虚拟形象管理大师，主动探索并展示个人风格或创意，无论是头像、装扮、背景、还是主页的打造，都要追求完美和风格化，对虚拟美学的执念深入骨髓。',
+    quotes:'"开新皮先改资料卡"、"这篇排版不错，很满意"、"新头像框好配我这个皮！',
+    behavior:'比起张扬，你更在意独属于自己的仪式感。乐于搭配装扮个人形象并分享，对美学有极高追求，即使是文字的排版也不会放过。习惯用装扮表达情绪，用细节诉说心意。'},
+  '社-探-逻-被':{ code:'OOMG', name:'惊叹者', emoji:'😱',
+    trait:'心里住着一个藏不住情绪的小太阳，对世界永远保有最鲜活的心动。不是刻意夸张，只是太容易被美好击中、被惊喜打动，擅长用最夸张的言语和表情包来表达震惊、狂喜或激动。',
+    quotes:'"OMG！！！"、"我疯了！！！啊啊啊！"、"[一连串意义不明的尖叫表情包]"',
+    behavior:'是朋友里的气氛组天花板，用饱满的热情感染身边的每一个人，有他们的地方永远不会冷场。在人群里总是最鲜活热闹的那一个，用满到溢出的热情温暖着身边人，看似吵闹，实则比谁都真诚柔软。'},
+  '独-探-逻-主':{ code:'SZD', name:'嗑学者', emoji:'🔬',
+    trait:'善于分析细节，挖掘真相，坚信自己的发现，拥有超强的观察力和逻辑分析能力。“嗑学家”本体，拥有从细节里抠出糖来的超凡能力。',
+    quotes:'"是真的！！！"、"这还不真？！"、"家产天下第一"、"如果你知道我吃怎么好你也觉得我命好"',
+    behavior:'爱的侦探，始终满怀热忱地游走在圈子里，在蛛丝马迹中寻找爱情的证据。逐帧分析每一个互动、放大每一个像素点，产出逻辑严谨的长篇嗑学论文为所有美好共鸣作证，所有的巧合都是命中注定，所有的细节都是爱的告白。'},
+  '独-探-情-被':{ code:'WIFI', name:'波动者', emoji:'📶',
+    trait:'热情与冷淡并非刻意，只是内心信号偶尔不稳，时而满格热烈，时而微弱安静，在靠近与独处间自在切换，活得直白又坦诚。',
+    quotes:'"在吗在吗！"、"我先去躺会儿"、"上次说到哪了？"、"？……。……！！"',
+    behavior:'心情晴朗时会满心欢喜地扑向身边人，情绪低落时又会悄悄隐身安静充电。上一秒还在热烈倾诉，下一秒可能突然掉线；时而想拥抱全世界，时而只想独自安静待着。情绪本就没有固定形状，你的波动，不过是最真实的自我流露。"。'},
+  '独-沉-情-被':{ code:'SSSR', name:'天选者', emoji:'🎰',
+    trait:'被世界悄悄偏爱的幸运本身，总带着一点漫不经心的玄学体质。旁人眼中全凭运气的惊喜，其实是你专注又纯粹的心意，被命运温柔回应。不必刻意争抢，美好总会精准落在你身前。',
+    quotes:'"一发出隐藏"、"啊？你们都没抽到吗？"、"10抽全部拿下！"',
+    behavior:'从不张扬炫耀，只是顺手截图了日常。好运令人嫉妒又羡慕，是所有人抽卡前必来 "蹭欧气" 的活锦鲤，用温柔接住了每一份降临的美好，让好运有处可栖。'}
+};
+
+const CP_MAP = {
+  'XSWL':{ partner:'YYDS', relName:'【快乐发电】', desc:'一个制造快乐，一个放大快乐。欢笑者发现趣事，夸夸者不吝赞美，共同构成互联网正能量循环，是气氛组的王牌夫妻档。' },
+  'YYDS':{ partner:'XSWL', relName:'【快乐发电】', desc:'一个制造快乐，一个放大快乐。欢笑者发现趣事，夸夸者不吝赞美，共同构成互联网正能量循环，是气氛组的王牌夫妻档。' },
+  'RWKK':{ partner:'SRDS', relName:'【产粮永动机】', desc:'好奇者负责发现新素材和抛出观点，反驳者负责进行逻辑修正和深度挖掘。一个开疆拓土，一个精耕细作，是共同提升内容质量的智力型搭档。' },
+  'SRDS':{ partner:'RWKK', relName:'【产粮永动机】', desc:'好奇者负责发现新素材和抛出观点，反驳者负责进行逻辑修正和深度挖掘。一个开疆拓土，一个精耕细作，是共同提升内容质量的智力型搭档。' },
+  'OBER':{ partner:'NSDD', relName:'【人间清醒】', desc:'旁观者对万事漠不关心，躺平者对万事表示同意。两人在一起就是"啊对对对"和"OBER"的完美结合，是反内卷、反焦虑的佛系天花板。' },
+  'NSDD':{ partner:'OBER', relName:'【人间清醒】', desc:'旁观者对万事漠不关心，躺平者对万事表示同意。两人在一起就是"啊对对对"和"OBER"的完美结合，是反内卷、反焦虑的佛系天花板。' },
+  'FLAG':{ partner:'HYQ+', relName:'【饼王の经纪人】', desc:'立誓者天天画大饼，冲浪者手握庞大资源和人脉。一个有点子，一个有能力，是最有可能把FLAG变成现实的互补型创业CP。' },
+  'HYQ+':{ partner:'FLAG', relName:'【饼王の经纪人】', desc:'立誓者天天画大饼，冲浪者手握庞大资源和人脉。一个有点子，一个有能力，是最有可能把FLAG变成现实的互补型创业CP。' },
+  'SZD': { partner:'OOMG', relName:'【显微镜与大喇叭】', desc:'嗑学者用显微镜寻找真相，惊叹者用扩音器广播成果。一个负责严谨考据，一个负责情绪渲染，是共同将"事业"推向高潮的最佳拍档。' },
+  'OOMG':{ partner:'SZD',  relName:'【显微镜与大喇叭】', desc:'嗑学者用显微镜寻找真相，惊叹者用扩音器广播成果。一个负责严谨考据，一个负责情绪渲染，是共同将"事业"推向高潮的最佳拍档。' },
+  'REST':{ partner:'NPC',  relName:'【静·电感应】', desc:'休息者选择消失，附和者等待召唤。两人在一起的画面就是"ZZZ..."和"+1"的极致简约风，是互不打扰、岁月静好的典范。' },
+  'NPC': { partner:'REST', relName:'【静·电感应】', desc:'休息者选择消失，附和者等待召唤。两人在一起的画面就是"ZZZ..."和"+1"的极致简约风，是互不打扰、岁月静好的典范。' },
+  'CPDD':{ partner:'OOTD', relName:'【赛博双排】', desc:'寻爱者勇敢追爱，展示者善于经营个人形象。一个主动出击，一个魅力四射，是双向奔赴、共同经营"网络情缘"的模范搭子。' },
+  'OOTD':{ partner:'CPDD', relName:'【赛博双排】', desc:'寻爱者勇敢追爱，展示者善于经营个人形象。一个主动出击，一个魅力四射，是双向奔赴、共同经营"网络情缘"的模范搭子。' },
+  'WIFI':{ partner:'SSSR', relName:'【波动守恒】', desc:'波动者信号不稳，时而热情似火时而冷漠如冰；天选者情绪稳定，永远被好运眷顾。一个需要稳定的能量源，一个能提供永恒的幸运港湾，是情绪上的完美互补。' },
+  'SSSR':{ partner:'WIFI', relName:'【波动守恒】', desc:'波动者信号不稳，时而热情似火时而冷漠如冰；天选者情绪稳定，永远被好运眷顾。一个需要稳定的能量源，一个能提供永恒的幸运港湾，是情绪上的完美互补。' }
+};
+
+// ===== 状态 =====
+let shuffledQuestions = [];
+let answers = {};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== 卷首页 =====
+function startQuiz() {
+  shuffledQuestions = shuffle(QUESTIONS);
+  answers = {};
+  renderQuiz();
+  showPage('page-quiz');
+  window.scrollTo(0, 0);
+}
+
+// ===== 答题页 =====
+function renderQuiz() {
+  const body = document.getElementById('quizBody');
+  body.innerHTML = '';
+  shuffledQuestions.forEach((q, idx) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    const title = document.createElement('div');
+    title.className = 'question-title';
+    title.textContent = `${idx + 1}. ${q.text}`;
+    block.appendChild(title);
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt.text;
+      btn.onclick = () => selectOption(q.id, opt.val, block, q);
+      block.appendChild(btn);
+    });
+    body.appendChild(block);
+  });
+  updateProgress();
+}
+
+function selectOption(qId, val, block, q) {
+  answers[qId] = val;
+  const btns = block.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.toggle('selected', q.options[i].val === val);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = shuffledQuestions.length;
+  const done = Object.keys(answers).length;
+  document.getElementById('progressFill').style.width = (done / total * 100) + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total}`;
+  document.getElementById('btnSubmit').disabled = done < total;
+}
+
+// ===== 计分 =====
+function calcResult() {
+  const dimA = [0, 0, 0, 0];
+  QUESTIONS.forEach(q => { if (answers[q.id] === 'A') dimA[q.dim]++; });
+  const labels = [
+    dimA[0] >= 2 ? '社' : '独',
+    dimA[1] >= 2 ? '探' : '沉',
+    dimA[2] >= 2 ? '逻' : '情',
+    dimA[3] >= 2 ? '主' : '被'
+  ];
+  return { key: labels.join('-'), labels, dimA };
+}
+
+// ===== 提交 =====
+function submitQuiz() {
+  const { key, labels, dimA } = calcResult();
+  const typeData = TYPES[key];
+  renderResult(typeData, labels, dimA);
+  showPage('page-result');
+  window.scrollTo(0, 0);
+}
+
+// ===== 结果页 =====
+function renderResult(typeData, labels, dimA) {
+  document.getElementById('resultTypeName').textContent = `${typeData.code} ${typeData.name}`;
+  document.getElementById('resultTrait').textContent = typeData.trait;
+  document.getElementById('resultQuotes').textContent = typeData.quotes;
+  document.getElementById('resultBehavior').textContent = typeData.behavior;
+  document.getElementById('avatarEmoji').textContent = typeData.emoji;
+
+  // 气泡
+  const area = document.getElementById('bubbleArea');
+  area.querySelectorAll('.chat-bubble').forEach(b => b.remove());
+  const rawQuotes = typeData.quotes.split('、').slice(0, 4);
+  const positions = ['pos-tl', 'pos-tr', 'pos-bl', 'pos-br'];
+  rawQuotes.forEach((q, i) => {
+    const b = document.createElement('div');
+    b.className = `chat-bubble ${positions[i]}`;
+    b.textContent = q.replace(/^"|"$/g, '').replace(/^"|"$/g, '');
+    area.appendChild(b);
+  });
+
+  // 维度条
+  const dimsSection = document.getElementById('dimsSection');
+  const dimDefs = [
+    { labelA: '社交', labelB: '独处', valA: dimA[0] },
+    { labelA: '探索', labelB: '沉浸', valA: dimA[1] },
+    { labelA: '逻辑', labelB: '情感', valA: dimA[2] },
+    { labelA: '主动', labelB: '被动', valA: dimA[3] }
+  ];
+  dimsSection.innerHTML = dimDefs.map(d => {
+    const pct = Math.round(d.valA / 3 * 100);
+    return `<div class="dim-row">
+      <span class="dim-lbl-a">${d.labelA}</span>
+      <div class="dim-track"><div class="dim-fill" style="width:0%" data-pct="${pct}"></div></div>
+      <span class="dim-lbl-b">${d.labelB}</span>
+    </div>`;
+  }).join('');
+  // 动画触发
+  setTimeout(() => {
+    dimsSection.querySelectorAll('.dim-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 50);
+
+  // CP
+  const cp = CP_MAP[typeData.code];
+  if (cp) {
+    const partnerData = Object.values(TYPES).find(t => t.code === cp.partner);
+    document.getElementById('cpRelName').textContent = cp.relName;
+    document.getElementById('cpPartnerName').textContent = partnerData ? `${cp.partner} ${partnerData.name}` : cp.partner;
+    document.getElementById('cpDesc').textContent = cp.desc;
+  }
+}
+
+// ===== 重测 =====
+function retryQuiz() { startQuiz(); }
+</script>
+</body>
+</html>
 
